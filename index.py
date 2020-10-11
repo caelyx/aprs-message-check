@@ -6,7 +6,9 @@ import datetime
 import dbm
 import os
 
-from config import *
+from config import APIKEY,CALLSIGNS
+
+DATABASE = 'seen_msgs'
 
 def main():
     requestString = 'https://api.aprs.fi/api/get?what=msg&dst=%s&apikey=%s&format=json' % (CALLSIGNS, APIKEY)
@@ -28,9 +30,11 @@ def main():
         if not e['messageid'] in db:
             newmessages = True
             # print ('New message:', e['messageid'])
+            fp_messages.write("%s -> %s -> %s (%s UTC)" %(e['srccall'], e['dst'], e['message'], e['timestamp']))
+            fp_messages.write("\n\n")
             fp_messages.write(str(e))
-            fp_messages.write("\n")
-            print(e)
+            fp_messages.write("\n\n\n")
+            # print(e)
             db[ e['messageid'] ] = e['timestamp']
 
     if newmessages:
