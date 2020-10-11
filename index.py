@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import requests
-import json
 import datetime
 import dbm
 import os
@@ -27,7 +26,6 @@ def main():
     requestString = 'https://api.aprs.fi/api/get?what=msg&dst=%s&apikey=%s&format=json' % (CALLSIGNS, APIKEY)
 
     r = requests.get(requestString)
-    #print("Request status code: ", r.status_code)
     assert r.status_code == 200 # TODO Lazy
     data = r.json()
 
@@ -39,23 +37,19 @@ def main():
     for e in data['entries']:
         timestamp = datetime.datetime.fromtimestamp(int(e['time']))
         e['timestamp'] = timestamp.strftime("%F %H:%M")
-        #Key fields: e['messageid'] e['srccall'], e['dst'], e['message']
+        # Key fields: e['messageid'] e['srccall'], e['dst'], e['message']
         if not e['messageid'] in db:
             newmessages = True
-            # print ('New message:', e['messageid'])
             fp_messages.write("%s -> %s -> %s (%s UTC)" %(e['srccall'], e['dst'], e['message'], e['timestamp']))
             fp_messages.write("\n\n")
             fp_messages.write(str(e))
             fp_messages.write("\n\n\n")
-            # print(e)
             db[ e['messageid'] ] = e['timestamp']
 
     fp_messages.close()
 
     if newmessages:
         os.system('mail -s "New APRS Messages" %s < messages.txt' % EMAIL)
-    #else:
-    #   print ("No new messages.")
     
     db.close()
 
