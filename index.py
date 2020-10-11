@@ -6,11 +6,24 @@ import datetime
 import dbm
 import os
 
-from config import APIKEY,CALLSIGNS
+from config import APIKEY,CALLSIGNS,EMAIL
 
 DATABASE = 'seen_msgs'
 
 def main():
+    """Email a summary of new APRS messages.
+
+    Steps:
+    * Poll APRS.FI for messages involving given callsigns, 
+    * filter out ones previously reported, and 
+    * email any new messages to EMAIL.
+
+    Stores previously seen message IDs in a DBM database in the local 
+    filesystem. If it gets too large or if errors occur, just delete 
+    it, as the worst-case impact is it emails you again for messages 
+    you've already seen.
+    """
+
     requestString = 'https://api.aprs.fi/api/get?what=msg&dst=%s&apikey=%s&format=json' % (CALLSIGNS, APIKEY)
 
     r = requests.get(requestString)
@@ -37,9 +50,10 @@ def main():
             # print(e)
             db[ e['messageid'] ] = e['timestamp']
 
+    fp_messages.close()
+
     if newmessages:
-        fp_messages.close()
-        os.system('mail -s "New APRS Messages" s@t2kv.io < messages.txt')
+        os.system('mail -s "New APRS Messages" %s < messages.txt' % EMAIL)
     #else:
     #   print ("No new messages.")
     

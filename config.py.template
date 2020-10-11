@@ -1,0 +1,3 @@
+CALLSIGNS = 'VK2RAG-1,VK2RWI-1'     # Callsigns you want to monitor, separated by commas
+APIKEY    = 'YOUR_APRS.FI_KEY_HERE' # Get your API Key at https://aprs.fi/account/ after creating an account
+EMAIL     = 'messages@example.com'  # Email address for message notifications
